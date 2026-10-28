@@ -1,0 +1,8 @@
+# Ignore compiled files
+*.log
+
+# Node modules (if you ever add npm packages)
+node_modules/
+
+# GitHub Actions artifacts
+.github/
