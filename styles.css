@@ -1,7 +1,16 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
   margin: 0;
   padding: 1rem;
   background: #121212;
   color: #eee;
+}
+
+/* Simple pixelated art container */
+#art {
+  width: 320px;
+  height: 240px;
+  image-rendering: pixelated;
+  border: 2px solid #fff;
+  margin-top: 1rem;
 }

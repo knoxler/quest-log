@@ -1,14 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quest Log</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>Quest Log with Pixel Art</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>Quest Log</h1>
-  <p>Open the app in a browser. The UI will load from <code>app.js</code>.</p>
-  <script src="app.js"></script>
+  <div id="app"></div>
+
+  <!-- Pixel art section -->
+  <div id="art-container">
+    <canvas id="art" width="32" height="24" style="width: 320px; height: 240px;"></canvas>
+    <input type="file" id="upload" accept="image/*">
+    <button id="save-art">Save Art</button>
+  </div>
+
+  <script type="module">
+    import { loadData, saveData } from './storage.js';
+    const canvas = document.getElementById('art');
+    const ctx = canvas.getContext('2d');
+    const upload = document.getElementById('upload');
+    const saveBtn = document.getElementById('save-art');
+
+    canvas.style.imageRendering = 'pixelated';
+
+    upload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const dataURL = canvas.toDataURL('image/png');
+      const data = loadData();
+      data.art = dataURL;
+      saveData(data);
+      alert('Art saved to localStorage.');
+    });
+
+    const data = loadData();
+    if (data.art) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = data.art;
+    }
+  </script>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
