@@ -18,6 +18,10 @@ There's also an optional AI helper for brainstorming and breaking tasks into ste
 
 Open index.html in your browser. No build step needed.
 
+## Running the app
+
+Because `index.html` uses ES‑module imports, it must be served via HTTP (e.g., with VS Code’s Live Server, `python -m http.server`, or any local web server). Opening the file directly with `file://` will block the modules and the UI will not load. This is a browser security restriction, not a bug in the code.
+
 To use the AI helper, enter your Anthropic API key in Settings. It's stored only in your browser's localStorage. This is a personal project, so never share your API key.
 
 ## Roadmap
