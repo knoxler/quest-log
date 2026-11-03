@@ -10,11 +10,22 @@
   <h1>Quest Log</h1>
   <div id="tab-bar">
     <button id="tab-quests" class="tab active" type="button">Quests</button>
+    <button id="tab-daily" class="tab" type="button">Daily</button>
     <button id="tab-journal" class="tab" type="button">Journal</button>
     <button id="tab-completed" class="tab" type="button">Completed</button>
   </div>
   <div id="panel-quests">
     <div id="app"></div>
+  </div>
+  <div id="panel-daily" hidden>
+    <div id="daily-panel">
+      <h2 id="daily-date">Daily</h2>
+      <div id="daily-add-row">
+        <input type="text" id="daily-input" placeholder="New task...">
+        <button id="daily-add" type="button">Add</button>
+      </div>
+      <ul id="daily-list"></ul>
+    </div>
   </div>
   <div id="panel-journal" hidden>
     <div id="journal-panel">

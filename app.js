@@ -16,7 +16,8 @@
 import {
   loadData, saveData,
   loadJournalEntries, saveJournalEntry,
-  saveCompletedQuest, loadCompletedQuests, removeCompletedQuest
+  saveCompletedQuest, loadCompletedQuests, removeCompletedQuest,
+  loadDailyTasks, saveDailyTasks
 } from './storage.js';
 import { generateResponse } from './ai-helper.js';
 
@@ -383,7 +384,7 @@ function render() {
 
 // Tab switching: show one panel at a time, mark the active tab.
 function switchTab(name) {
-  ['quests', 'journal', 'completed'].forEach(tabName => {
+  ['quests', 'daily', 'journal', 'completed'].forEach(tabName => {
     const panel = document.getElementById('panel-' + tabName);
     const tab = document.getElementById('tab-' + tabName);
     if (panel) panel.hidden = tabName !== name;
@@ -391,6 +392,7 @@ function switchTab(name) {
   });
 }
 document.getElementById('tab-quests').addEventListener('click', () => switchTab('quests'));
+document.getElementById('tab-daily').addEventListener('click', () => switchTab('daily'));
 document.getElementById('tab-journal').addEventListener('click', () => switchTab('journal'));
 document.getElementById('tab-completed').addEventListener('click', () => switchTab('completed'));
 
@@ -471,6 +473,81 @@ function restoreQuest(id) {
   renderCompletedList();
 }
 renderCompletedList();
+
+// Daily tab: per-day tasks keyed by local date (YYYY-MM-DD).
+const todayKey = () => {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+};
+
+function addDailyTask() {
+  const input = document.getElementById('daily-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const all = loadDailyTasks();
+  const tasks = Array.isArray(all[todayKey()]) ? all[todayKey()] : [];
+  tasks.push({ id: genId(), text, done: false });
+  all[todayKey()] = tasks;
+  saveDailyTasks(all);
+  input.value = '';
+  input.focus();
+  renderDailyList();
+}
+
+// Copy a daily task into the bottom-bar quest form (does not remove the task).
+function upgradeDailyTask(t) {
+  switchTab('quests');
+  const titleInput = document.getElementById('title');
+  titleInput.value = t.text;
+  titleInput.focus();
+}
+
+function renderDailyList() {
+  const list = document.getElementById('daily-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const all = loadDailyTasks();
+  const tasks = Array.isArray(all[todayKey()]) ? all[todayKey()] : [];
+  if (!tasks.length) {
+    list.appendChild(createElement('li', { class: 'daily-empty' }, 'No tasks yet today.'));
+    return;
+  }
+  tasks.forEach(t => {
+    const cb = createElement('input', { type: 'checkbox', 'aria-label': 'Toggle task: ' + t.text });
+    if (t.done) cb.checked = true;
+    cb.addEventListener('change', () => {
+      const cur = loadDailyTasks();
+      const entry = (cur[todayKey()] || []).find(x => x.id === t.id);
+      if (entry) { entry.done = cb.checked; saveDailyTasks(cur); renderDailyList(); }
+    });
+    const label = createElement('span', { class: 'task-label' }, t.text);
+    const upgradeButton = createElement('button', { class: 'daily-btn' }, 'Upgrade');
+    upgradeButton.addEventListener('click', () => upgradeDailyTask(t));
+    const removeButton = createElement('button', { class: 'daily-btn' }, 'Remove');
+    removeButton.addEventListener('click', () => {
+      const cur = loadDailyTasks();
+      cur[todayKey()] = (cur[todayKey()] || []).filter(x => x.id !== t.id);
+      saveDailyTasks(cur);
+      renderDailyList();
+    });
+    list.appendChild(createElement('li',
+      { class: 'task-item' + (t.done ? ' done' : '') },
+      cb, label, upgradeButton, removeButton
+    ));
+  });
+}
+
+document.getElementById('daily-date').textContent =
+  'Daily — ' + new Date().toLocaleDateString();
+document.getElementById('daily-add').addEventListener('click', addDailyTask);
+document.getElementById('daily-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addDailyTask();
+  }
+});
+renderDailyList();
 
 // Initial render when the page loads
 render();

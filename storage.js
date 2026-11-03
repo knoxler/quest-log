@@ -68,3 +68,20 @@ export function removeCompletedQuest(id) {
   localStorage.setItem(COMPLETED_KEY, JSON.stringify(list));
   return list;
 }
+
+/* Daily tasks live under their own key, separate from the quest data.
+   Stored as an object keyed by local date (YYYY-MM-DD) → array of { id, text, done }. */
+const DAILY_KEY = 'questlog_daily';
+
+export function loadDailyTasks() {
+  try {
+    const data = JSON.parse(localStorage.getItem(DAILY_KEY));
+    return (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveDailyTasks(data) {
+  localStorage.setItem(DAILY_KEY, JSON.stringify(data));
+}
