@@ -91,11 +91,47 @@ html, body { height: 100%; }
   color: #fff;
   border-color: #3a3733 #8a857c #8a857c #3a3733; /* bevel flipped */
 }
-.journal-placeholder {
+/* Journal panel */
+#journal-panel {
+  background: #57534c; /* same stone-gray panel fill as the Quests columns */
+  border: 2px solid;
+  border-color: #8a857c #3a3733 #3a3733 #8a857c;
+  padding: 1rem;
+  height: calc(100vh - 210px);
+  overflow-y: auto;
+}
+#journal-text {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 10rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: #1a1a1a;
+  color: #eee;
+  padding: 0.5rem;
+  border: 2px solid #3a3733;
+}
+#journal-save {
+  margin-top: 0.75rem;
+  font-family: inherit;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.8rem;
+  color: #ddd;
   background: #57534c;
   border: 2px solid;
   border-color: #8a857c #3a3733 #3a3733 #8a857c;
-  padding: 2rem;
-  text-align: center;
+  cursor: pointer;
+}
+#journal-list {
+  list-style: none;
+  padding: 0;
+}
+#journal-list .journal-entry {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+#journal-list .journal-entry:hover,
+#journal-list .journal-entry:active {
+  background: #8a857c;
 }
 

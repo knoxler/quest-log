@@ -64,3 +64,9 @@ Also shipped: the Quests/Journal tab bar (Journal tab is a placeholder, to be fi
 **Next up:**
 
 Make the gamification work well — importance levels, XP, levels, and streaks that actually motivate you to finish things. Then rewards: a medieval pixel village or character, in the style of Kingdom Come, that looks better as you level up. That's a nice extra, not a priority.
+
+## Known issues
+
+Known issues go here as a running list — add a bullet per issue as they're found, remove it once fixed.
+
+- Journal: clicking a past entry loads its text into the textarea, but Save always creates a new entry instead of updating the one that's open. Editing an old entry makes a copy. Fix later by having Save update the existing entry when one is loaded.

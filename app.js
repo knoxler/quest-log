@@ -13,7 +13,7 @@
  *    • Settings section to choose AI provider and trigger a sort
  */
 
-import { loadData, saveData } from './storage.js';
+import { loadData, saveData, loadJournalEntries, saveJournalEntry } from './storage.js';
 import { generateResponse } from './ai-helper.js';
 
 const genId = () => '_' + Math.random().toString(36).slice(2, 11);
@@ -307,6 +307,32 @@ function switchTab(name) {
 }
 document.getElementById('tab-quests').addEventListener('click', () => switchTab('quests'));
 document.getElementById('tab-journal').addEventListener('click', () => switchTab('journal'));
+
+// Journal tab: past entries, newest first; clicking one loads its full text.
+function renderJournalList() {
+  const list = document.getElementById('journal-list');
+  list.innerHTML = '';
+  const entries = loadJournalEntries().slice().sort((a, b) => b.savedAt - a.savedAt);
+  entries.forEach(e => {
+    const firstLine = (e.text.split('\n')[0] || '').trim() || '(empty)';
+    const li = createElement('li', { class: 'journal-entry' },
+      new Date(e.savedAt).toLocaleString() + '  —  ' + firstLine
+    );
+    li.addEventListener('click', () => {
+      document.getElementById('journal-text').value = e.text;
+    });
+    list.appendChild(li);
+  });
+}
+document.getElementById('journal-save').addEventListener('click', () => {
+  const ta = document.getElementById('journal-text');
+  const text = ta.value.trim();
+  if (!text) return;
+  saveJournalEntry(text);
+  ta.value = '';
+  renderJournalList();
+});
+renderJournalList();
 
 // Initial render when the page loads
 render();
