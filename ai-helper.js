@@ -13,6 +13,7 @@ export async function generateResponse(messages, provider, model) {
     const body = {
       model: model || 'gpt-oss:20b',
       messages,
+      stream: false, // return one JSON object instead of streamed lines
     };
     const resp = await fetch(url, {
       method: 'POST',

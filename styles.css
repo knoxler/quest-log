@@ -18,9 +18,84 @@ html, body { height: 100%; }
 }
 #list-container {
   display: flex;
+  gap: 0.5rem;
 }
 
-#left-column {
-  min-width: 260px;
+/* Old-school RuneScape interface panels: stone-gray fill, bevel, fixed height, own scroll */
+#left-column,
+#right-column {
+  flex: 1 1 50%;
+  background: #57534c;
+  border: 2px solid;
+  border-color: #8a857c #3a3733 #3a3733 #8a857c;
+  padding: 1rem;
+  height: calc(100vh - 210px); /* viewport minus header, tabs, bottom bar */
+  overflow-y: auto;
+}
+
+/* Selectable quest list items */
+.quest-item {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+.quest-item.selected {
+  background: #8a857c; /* brighter than the column fill so it reads as selected */
+  box-shadow: inset 2px 0 0 #3a3733;
+}
+
+/* Right-column "how to complete" panel */
+#quest-panel {
+  background: #1a1a1a;
+  border: 2px solid;
+  border-color: #8a857c #3a3733 #3a3733 #8a857c;
+  padding: 1rem;
+}
+#guidance {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  min-height: 2rem;
+}
+#regenerate {
+  margin-top: 0.75rem;
+  font-family: inherit;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.8rem;
+  color: #ddd;
+  background: #57534c;
+  border: 2px solid;
+  border-color: #8a857c #3a3733 #3a3733 #8a857c;
+  cursor: pointer;
+}
+
+/* OSRS-style tab bar */
+#tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+.tab {
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 0.75rem 1.25rem;
+  color: #ddd;
+  background: #57534c; /* dark stone-gray fill */
+  border: 2px solid;
+  border-color: #8a857c #3a3733 #3a3733 #8a857c; /* lighter bevel, top-left */
+  cursor: pointer;
+}
+.tab:hover {
+  background: #6b665e;
+}
+.tab.active {
+  background: #8a857c; /* pressed-in / brighter */
+  color: #fff;
+  border-color: #3a3733 #8a857c #8a857c #3a3733; /* bevel flipped */
+}
+.journal-placeholder {
+  background: #57534c;
+  border: 2px solid;
+  border-color: #8a857c #3a3733 #3a3733 #8a857c;
+  padding: 2rem;
+  text-align: center;
 }
 
