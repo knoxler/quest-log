@@ -50,8 +50,11 @@ function render() {
   const appDiv = document.getElementById('app');
   appDiv.innerHTML = '';
 const formContainer = createElement('div', { id: 'form-container' });
-appDiv.appendChild(formContainer);
 const listContainer = createElement('div', { id: 'list-container' });
+const leftColumn = createElement('div', { id: 'left-column' });
+const rightColumn = createElement('div', { id: 'right-column' });
+listContainer.appendChild(leftColumn);
+listContainer.appendChild(rightColumn);
 appDiv.appendChild(listContainer);
 
   // Header
@@ -84,6 +87,7 @@ appDiv.appendChild(listContainer);
       rows: 3
     }),
     createElement('button', { type: 'submit' }, 'Add Quest')
+
   );
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -126,7 +130,7 @@ appDiv.appendChild(listContainer);
     );
     list.appendChild(li);
   });
-  listContainer.appendChild(list);
+  leftColumn.appendChild(list);
 
   // Settings: AI provider selector and sort button
   const providerSelect = createElement('select', { id: 'provider-select' },
@@ -183,7 +187,13 @@ appDiv.appendChild(listContainer);
     providerSelect,
     sortButton
   );
-  appDiv.appendChild(settingsDiv);
+  settingsDiv.insertBefore(formContainer, settingsDiv.firstChild);
+const settingsPlaceholder = document.getElementById('settings-placeholder');
+  if (settingsPlaceholder) {
+    settingsPlaceholder.appendChild(settingsDiv);
+  } else {
+    appDiv.appendChild(settingsDiv);
+  }
 }
 
 // Initial render when the page loads
