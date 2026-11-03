@@ -14,7 +14,10 @@
   <div id="art-container">
     <canvas id="art" width="32" height="24" style="width: 320px; height: 240px;"></canvas>
     <input type="file" id="upload" accept="image/*">
-    <button id="save-art">Save Art</button>
+      <!-- Pixel art section -->
+  <div id="art-container">
+    <canvas id="art" width="32" height="24" style="width: 320px; height: 240px;"></canvas>
+    <input type="file" id="upload" accept="image/*">
   </div>
 
   <script type="module">
@@ -22,7 +25,6 @@
     const canvas = document.getElementById('art');
     const ctx = canvas.getContext('2d');
     const upload = document.getElementById('upload');
-    const saveBtn = document.getElementById('save-art');
 
     canvas.style.imageRendering = 'pixelated';
 
@@ -36,14 +38,6 @@
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       };
       img.src = URL.createObjectURL(file);
-    });
-
-    saveBtn.addEventListener('click', () => {
-      const dataURL = canvas.toDataURL('image/png');
-      const data = loadData();
-      data.art = dataURL;
-      saveData(data);
-      alert('Art saved to localStorage.');
     });
 
     const data = loadData();
