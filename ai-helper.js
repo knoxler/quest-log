@@ -4,7 +4,7 @@
  * Generate a response from the specified provider.
  * @param {Array<{role:string, content:string}>} messages - Conversation history.
  * @param {'anthropic'|'ollama'} provider - The provider to use.
- * @param {string} [model] - Optional model name. For Ollama defaults to 'gpt-oss:20b'; for Anthropic defaults to 'claude-3-5-sonnet-20240620'.
+ * @param {string} [model] - Optional model name. For Ollama defaults to 'gpt-oss:20b'; for Anthropic defaults to 'claude-sonnet-5-5'.
  * @returns {Promise<string>} - The assistant's content.
  */
 export async function generateResponse(messages, provider, model) {
@@ -29,15 +29,20 @@ export async function generateResponse(messages, provider, model) {
   }
 
   if (provider === 'anthropic') {
-    const url = 'https://api.anthropic.com/v1/chat/completions';
+    const url = 'https://api.anthropic.com/v1/messages';
     const apiKey = localStorage.getItem('anthropicApiKey');
     if (!apiKey) {
       throw new Error('Anthropic API key missing. Set localStorage key "anthropicApiKey".');
     }
+    // The Anthropic Messages API takes the system prompt as a top-level
+    // field, not as a message in the array.
+    const systemText = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+    const chatMessages = messages.filter(m => m.role !== 'system');
     const body = {
-      model: model || 'claude-3-5-sonnet-20240620',
-      max_tokens: 512,
-      messages,
+      model: model || 'claude-sonnet-5-5',
+      max_tokens: 1024,
+      system: systemText,
+      messages: chatMessages,
     };
     const resp = await fetch(url, {
       method: 'POST',
@@ -45,6 +50,8 @@ export async function generateResponse(messages, provider, model) {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
+        // Required for calling the API directly from a browser.
+        'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify(body),
     });
@@ -53,12 +60,12 @@ export async function generateResponse(messages, provider, model) {
       throw new Error(`Anthropic request failed: ${resp.status} ${err}`);
     }
     const data = await resp.json();
-    // Anthropic returns data.choices[0].message.content
-    const msg = data.choices?.[0]?.message?.content;
-    if (!msg) {
+    // Anthropic returns { content: [{ type: 'text', text: '...' }] }
+    const block = (data.content || []).find(b => b.type === 'text');
+    if (!block) {
       throw new Error('Anthropic response missing content');
     }
-    return msg;
+    return block.text;
   }
 
   throw new Error(`Unsupported provider: ${provider}`);

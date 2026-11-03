@@ -1,18 +1,9 @@
 body {
   font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
   margin: 0;
-  padding: 1rem;
+  padding: 1rem 1rem 5rem; /* bottom padding keeps content clear of the fixed settings bar */
   background: #121212;
   color: #eee;
-}
-
-/* Simple pixelated art container */
-#art {
-  width: 320px;
-  height: 240px;
-  image-rendering: pixelated;
-  border: 2px solid #fff;
-  margin-top: 1rem;
 }
 html, body { height: 100%; }
 #settings-placeholder {
@@ -27,5 +18,9 @@ html, body { height: 100%; }
 }
 #list-container {
   display: flex;
+}
+
+#left-column {
+  min-width: 260px;
 }
 

@@ -13,7 +13,7 @@
 import { loadData, saveData } from './storage.js';
 import { generateResponse } from './ai-helper.js';
 
-const genId = () => '_' + Math.random().toString(36).substr(2, 9);
+const genId = () => '_' + Math.random().toString(36).slice(2, 11);
 
 /* ------------------------------------------------------------------
  * Helper to create DOM elements with attributes and children
@@ -49,16 +49,16 @@ function render() {
 
   const appDiv = document.getElementById('app');
   appDiv.innerHTML = '';
-const formContainer = createElement('div', { id: 'form-container' });
-const listContainer = createElement('div', { id: 'list-container' });
-const leftColumn = createElement('div', { id: 'left-column' });
-const rightColumn = createElement('div', { id: 'right-column' });
-listContainer.appendChild(leftColumn);
-listContainer.appendChild(rightColumn);
-appDiv.appendChild(listContainer);
 
   // Header
   appDiv.appendChild(createElement('h2', {}, 'Quests'));
+
+  const listContainer = createElement('div', { id: 'list-container' });
+  const leftColumn = createElement('div', { id: 'left-column' });
+  const rightColumn = createElement('div', { id: 'right-column' });
+  listContainer.appendChild(leftColumn);
+  listContainer.appendChild(rightColumn);
+  appDiv.appendChild(listContainer);
 
   // Quest creation form
   const form = createElement('form', { id: 'quest-form' },
@@ -113,6 +113,7 @@ appDiv.appendChild(listContainer);
     form.reset();
     render();
   });
+  const formContainer = createElement('div', { id: 'form-container' });
   formContainer.appendChild(form);
 
   // Quest list
@@ -187,9 +188,14 @@ appDiv.appendChild(listContainer);
     providerSelect,
     sortButton
   );
+  // Form intentionally lives at the bottom of the page.
   settingsDiv.insertBefore(formContainer, settingsDiv.firstChild);
-const settingsPlaceholder = document.getElementById('settings-placeholder');
+
+  // Clear the placeholder first so re-renders don't stack duplicate
+  // settings bars.
+  const settingsPlaceholder = document.getElementById('settings-placeholder');
   if (settingsPlaceholder) {
+    settingsPlaceholder.innerHTML = '';
     settingsPlaceholder.appendChild(settingsDiv);
   } else {
     appDiv.appendChild(settingsDiv);
