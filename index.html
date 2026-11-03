@@ -10,46 +10,7 @@
   <h1>Quest Log</h1>
   <div id="app"></div>
 
-  <!-- Pixel art section -->
-  <div id="art-container">
-    <canvas id="art" width="32" height="24" style="width: 320px; height: 240px;"></canvas>
-    <input type="file" id="upload" accept="image/*">
-      <!-- Pixel art section -->
-  <div id="art-container">
-    <canvas id="art" width="32" height="24" style="width: 320px; height: 240px;"></canvas>
-    <input type="file" id="upload" accept="image/*">
-  </div>
 
-  <script type="module">
-    import { loadData, saveData } from './storage.js';
-    const canvas = document.getElementById('art');
-    const ctx = canvas.getContext('2d');
-    const upload = document.getElementById('upload');
-
-    canvas.style.imageRendering = 'pixelated';
-
-    upload.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const img = new Image();
-      img.onload = () => {
-        ctx.imageSmoothingEnabled = false;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      };
-      img.src = URL.createObjectURL(file);
-    });
-
-    const data = loadData();
-    if (data.art) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      };
-      img.src = data.art;
-    }
-  </script>
 
   <script type="module" src="app.js"></script>
 </body>
