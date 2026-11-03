@@ -40,7 +40,7 @@ To use the AI helper with Anthropic, set your API key in the browser console: `l
 - Fixed the Ollama request by sending `stream: false` so the response is one JSON object instead of streamed NDJSON lines (fixes the "Unexpected non-whitespace character after JSON" parse error)
 - Bottom bar tidied: the quest form now sits on one aligned row (title, type/category/importance dropdowns, a wider one-line Tasks field that grows to ~4 lines while focused, and Add Quest), with the AI Provider settings on their own row beneath, label vertically centered with its dropdown
 
-**2026-11-03 — task tracking, completion & Completed tab** (commit `TBD`)
+**2026-11-03 — task tracking, completion & Completed tab** (commit `e863b61`)
 
 - Tasks are now checkable: each is stored as `{ text, done }` (old string tasks are read safely and upgraded on first check), shown with a checkbox; checked tasks get a line-through and dimmer text
 - Added a "Complete quest" button in the right panel, disabled and dimmed until every task is done — a task-less quest can be completed immediately
