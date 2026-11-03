@@ -27,7 +27,7 @@ To use the AI helper with Anthropic, set your API key in the browser console: `l
 
 ## Recent changes
 
-**2026-11-03** (commit `TBD`)
+**2026-11-03** (commit `4ab0ed9`)
 
 - Added a Quests/Journal tab bar with OSRS-style stone-gray beveled tabs; Quests is the default, Journal shows a "coming soon" placeholder
 - Quest list is now selectable; clicking a quest fills the right column with its title, type, category, importance, and a "How to complete this" section
