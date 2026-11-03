@@ -31,7 +31,7 @@ To use the AI helper with Anthropic, set your API key in the browser console: `l
 
 ## Recent changes
 
-**2026-11-03 — Daily tab**
+**2026-11-03 — Daily tab** (commit `3666ae5`)
 
 - Added a **Daily** tab between Quests and Journal (tab order is now Quests, Daily, Journal, Completed), styled like the other OSRS tabs; the panel uses the same stone-gray fill, bevel, fixed height, and own scroll
 - The Daily panel shows a heading with today's date, a text input with an Add button (Enter also adds), and today's task list; empty input is ignored
