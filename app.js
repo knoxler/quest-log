@@ -52,36 +52,43 @@ function showQuestPanel(quest) {
     const cache = getGuidanceCache();
     delete cache[quest.id];
     setGuidanceCache(cache);
-    loadGuidance(quest);
+    loadGuidance(quest); // back to the short version
   });
   panel.appendChild(regenButton);
+  const thinkButton = createElement('button', { id: 'think-more' }, 'Think more');
+  thinkButton.addEventListener('click', () => loadGuidance(quest, { long: true, useCache: false }));
+  panel.appendChild(thinkButton);
   rightColumn.appendChild(panel);
   loadGuidance(quest);
 }
 
 // Always Ollama for the guidance panel, regardless of the settings bar provider.
-async function loadGuidance(quest) {
+// Short answer by default; { long: true } requests a fuller step-by-step plan.
+// Both modes share the same per-quest cache entry (Think more replaces it).
+async function loadGuidance(quest, { long = false, useCache = true } = {}) {
   const guidanceEl = document.getElementById('guidance');
-  const cache = getGuidanceCache();
-  if (cache[quest.id]) {
-    if (guidanceEl) guidanceEl.textContent = cache[quest.id];
-    return;
+  if (useCache) {
+    const cache = getGuidanceCache();
+    if (cache[quest.id]) {
+      if (guidanceEl) guidanceEl.textContent = cache[quest.id];
+      return;
+    }
   }
   if (guidanceEl) guidanceEl.textContent = 'thinking...';
-  const messages = [
-    {
-      role: 'user',
-      content:
-        `Quest title: ${quest.title}\n` +
-        `Type: ${quest.kind}\n` +
-        `Category: ${quest.category}\n` +
-        `Importance: ${quest.importance}\n` +
-        `Tasks:\n${(quest.tasks || []).join('\n') || '(none listed)'}\n\n` +
-        'How can this person complete this task? Give plain, practical guidance.'
-    }
-  ];
+  const questDetails =
+    `Quest title: ${quest.title}\n` +
+    `Type: ${quest.kind}\n` +
+    `Category: ${quest.category}\n` +
+    `Importance: ${quest.importance}\n` +
+    `Tasks:\n${(quest.tasks || []).join('\n') || '(none listed)'}\n\n`;
+  const ask = long
+    ? 'How can this person complete this task? Give a fuller step-by-step plan with practical details.'
+    : 'How can this person complete this task? Give plain, practical guidance in 3 short sentences or fewer, no lists, no headings.';
+  const messages = [{ role: 'user', content: questDetails + ask }];
   try {
-    const text = await generateResponse(messages, 'ollama');
+    const text = await generateResponse(messages, 'ollama', undefined, {
+      num_predict: long ? 500 : 120,
+    });
     const c = getGuidanceCache();
     c[quest.id] = text;
     setGuidanceCache(c);

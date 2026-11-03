@@ -55,7 +55,8 @@ html, body { height: 100%; }
   line-height: 1.6;
   min-height: 2rem;
 }
-#regenerate {
+#regenerate,
+#think-more {
   margin-top: 0.75rem;
   font-family: inherit;
   font-size: 0.7rem;

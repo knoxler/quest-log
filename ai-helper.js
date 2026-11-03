@@ -5,15 +5,17 @@
  * @param {Array<{role:string, content:string}>} messages - Conversation history.
  * @param {'anthropic'|'ollama'} provider - The provider to use.
  * @param {string} [model] - Optional model name. For Ollama defaults to 'gpt-oss:20b'; for Anthropic defaults to 'claude-sonnet-5-5'.
+ * @param {object} [opts] - Optional Ollama request options, e.g. { num_predict: 120 }. Ignored by other providers.
  * @returns {Promise<string>} - The assistant's content.
  */
-export async function generateResponse(messages, provider, model) {
+export async function generateResponse(messages, provider, model, opts) {
   if (provider === 'ollama') {
     const url = 'http://localhost:11434/api/chat';
     const body = {
       model: model || 'gpt-oss:20b',
       messages,
       stream: false, // return one JSON object instead of streamed lines
+      ...(opts ? { options: opts } : {}), // e.g. { num_predict: 120 }
     };
     const resp = await fetch(url, {
       method: 'POST',
