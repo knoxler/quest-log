@@ -136,3 +136,36 @@ html, body { height: 100%; }
   background: #8a857c;
 }
 
+/* Bottom bar: quest form on one tidy row, AI provider settings on a row beneath */
+#settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+#form-container {
+  flex: 1 1 100%; /* form takes the first full row */
+}
+#quest-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+#quest-form input,
+#quest-form select,
+#quest-form button {
+  height: 28px; /* one shared control height so the row aligns cleanly */
+}
+#tasks {
+  flex: 1 1 250px; /* grow to take the leftover space on the row */
+  min-width: 250px;
+  height: 28px; /* one line tall, like the other inputs */
+  resize: none;
+  overflow: hidden;
+  transition: height 0.15s ease;
+}
+#tasks:focus {
+  height: 92px; /* about 4 lines while typing; back to one line on blur */
+  overflow-y: auto;
+}
+
