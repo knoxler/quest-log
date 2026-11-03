@@ -35,3 +35,36 @@ export function saveJournalEntry(text) {
   localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
   return entry;
 }
+
+/* Completed quests live under their own key, separate from the quest data. */
+const COMPLETED_KEY = 'questlog_completed';
+
+export function loadCompletedQuests() {
+  try {
+    return JSON.parse(localStorage.getItem(COMPLETED_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCompletedQuest(quest) {
+  const list = loadCompletedQuests();
+  const entry = {
+    id: quest.id,
+    title: quest.title,
+    kind: quest.kind,
+    category: quest.category,
+    importance: quest.importance,
+    tasks: quest.tasks || [],
+    completedAt: Date.now(),
+  };
+  list.push(entry);
+  localStorage.setItem(COMPLETED_KEY, JSON.stringify(list));
+  return entry;
+}
+
+export function removeCompletedQuest(id) {
+  const list = loadCompletedQuests().filter(c => c.id !== id);
+  localStorage.setItem(COMPLETED_KEY, JSON.stringify(list));
+  return list;
+}

@@ -13,10 +13,19 @@
  *    • Settings section to choose AI provider and trigger a sort
  */
 
-import { loadData, saveData, loadJournalEntries, saveJournalEntry } from './storage.js';
+import {
+  loadData, saveData,
+  loadJournalEntries, saveJournalEntry,
+  saveCompletedQuest, loadCompletedQuests, removeCompletedQuest
+} from './storage.js';
 import { generateResponse } from './ai-helper.js';
 
 const genId = () => '_' + Math.random().toString(36).slice(2, 11);
+
+// A task may be a legacy plain string or an object { text, done }.
+// These readers normalize both shapes so old saved quests keep working.
+const taskText = (t) => (typeof t === 'string' ? t : (t && t.text)) || '';
+const taskDone = (t) => (typeof t === 'object' && t !== null) ? !!t.done : false;
 
 // Guidance panel state + cache (separate localStorage key, storage.js untouched)
 let selectedQuestId = null;
@@ -58,8 +67,40 @@ function showQuestPanel(quest) {
   const thinkButton = createElement('button', { id: 'think-more' }, 'Think more');
   thinkButton.addEventListener('click', () => loadGuidance(quest, { long: true, useCache: false }));
   panel.appendChild(thinkButton);
+  // Complete quest: enabled only when every task is done (or there are no tasks).
+  const allDone = (quest.tasks || []).length === 0 || (quest.tasks || []).every(t => taskDone(t));
+  const completeButton = createElement('button', { id: 'complete-quest' }, 'Complete quest');
+  completeButton.disabled = !allDone;
+  completeButton.title = allDone
+    ? 'Mark this quest as complete'
+    : 'Check off every task to complete this quest';
+  completeButton.addEventListener('click', () => completeQuest(quest));
+  panel.appendChild(completeButton);
   rightColumn.appendChild(panel);
   loadGuidance(quest);
+}
+
+// Hook for XP and rewards.
+function onQuestCompleted(quest) {
+  /* XP and rewards hook in here later. */
+}
+
+// Complete a quest: archive it, drop it from the active list, clear its
+// guidance cache, clear the selection/panel, and re-render.
+function completeQuest(quest) {
+  saveCompletedQuest(quest);
+  const data = loadData();
+  data.quests = (data.quests || []).filter(q => q.id !== quest.id);
+  saveData(data);
+  const cache = getGuidanceCache();
+  delete cache[quest.id];
+  setGuidanceCache(cache);
+  selectedQuestId = null;
+  const rightColumn = document.getElementById('right-column');
+  if (rightColumn) rightColumn.innerHTML = '';
+  render();
+  renderCompletedList();
+  onQuestCompleted(quest);
 }
 
 // Always Ollama for the guidance panel, regardless of the settings bar provider.
@@ -80,7 +121,7 @@ async function loadGuidance(quest, { long = false, useCache = true } = {}) {
     `Type: ${quest.kind}\n` +
     `Category: ${quest.category}\n` +
     `Importance: ${quest.importance}\n` +
-    `Tasks:\n${(quest.tasks || []).join('\n') || '(none listed)'}\n\n`;
+    `Tasks:\n${(quest.tasks || []).map(taskText).filter(Boolean).join('\n') || '(none listed)'}\n\n`;
   const ask = long
     ? 'How can this person complete this task? Give a fuller step-by-step plan with practical details.'
     : 'How can this person complete this task? Give plain, practical guidance in 3 short sentences or fewer, no lists, no headings.';
@@ -189,7 +230,9 @@ function render() {
     const category = document.getElementById('category').value;
     const importance = document.getElementById('importance').value;
     const tasksText = document.getElementById('tasks').value.trim();
-    const tasks = tasksText ? tasksText.split('\n').map(t => t.trim()).filter(t => t) : [];
+    const tasks = tasksText
+      ? tasksText.split('\n').map(t => t.trim()).filter(t => t).map(t => ({ text: t, done: false }))
+      : [];
     if (!title) return;
     const newQuest = {
       id: genId(),
@@ -212,6 +255,34 @@ function render() {
   // Quest list
   const list = createElement('ul', { id: 'quest-list' });
   data.quests.forEach(q => {
+    // Task list: each task is checkable. Tasks may be legacy strings or { text, done }.
+    const taskUl = createElement('ul', { class: 'task-list' });
+    q.tasks.forEach((t, i) => {
+      const label = taskText(t);
+      const done = taskDone(t);
+      const cb = createElement('input', { type: 'checkbox', 'aria-label': `Toggle task: ${label}` });
+      if (done) cb.checked = true;
+      const toggle = (e) => {
+        if (e) e.stopPropagation(); // don't also re-select the quest
+        const cur = q.tasks[i];
+        const obj = (typeof cur === 'string') ? { text: cur, done: false } : { ...cur };
+        obj.done = cb.checked;
+        q.tasks[i] = obj;
+        saveData(data); // existing quest save function
+        render(); // re-renders and keeps the current selection
+      };
+      cb.addEventListener('click', (e) => e.stopPropagation());
+      cb.addEventListener('change', toggle);
+      const taskSpan = createElement('span', { class: 'task-label' }, label);
+      // Clicking the label toggles the checkbox too.
+      taskSpan.addEventListener('click', (e) => { e.stopPropagation(); cb.checked = !cb.checked; toggle(e); });
+      const taskLi = createElement('li',
+        { class: 'task-item' + (done ? ' done' : '') },
+        cb,
+        taskSpan
+      );
+      taskUl.appendChild(taskLi);
+    });
     const li = createElement('li',
       { 'class': 'quest-item', 'data-quest-id': q.id },
       createElement('strong', {}, q.title),
@@ -219,9 +290,7 @@ function render() {
       createElement('span', {}, `[${q.kind}]`),
       ' ',
       createElement('span', {}, `(${q.importance})`),
-      createElement('ul', {},
-        q.tasks.map(t => createElement('li', {}, t))
-      )
+      taskUl
     );
     li.addEventListener('click', () => selectQuest(q));
     list.appendChild(li);
@@ -305,7 +374,7 @@ function render() {
 
 // Tab switching: show one panel at a time, mark the active tab.
 function switchTab(name) {
-  ['quests', 'journal'].forEach(tabName => {
+  ['quests', 'journal', 'completed'].forEach(tabName => {
     const panel = document.getElementById('panel-' + tabName);
     const tab = document.getElementById('tab-' + tabName);
     if (panel) panel.hidden = tabName !== name;
@@ -314,6 +383,7 @@ function switchTab(name) {
 }
 document.getElementById('tab-quests').addEventListener('click', () => switchTab('quests'));
 document.getElementById('tab-journal').addEventListener('click', () => switchTab('journal'));
+document.getElementById('tab-completed').addEventListener('click', () => switchTab('completed'));
 
 // Journal tab: past entries, newest first; clicking one loads its full text.
 function renderJournalList() {
@@ -340,6 +410,56 @@ document.getElementById('journal-save').addEventListener('click', () => {
   renderJournalList();
 });
 renderJournalList();
+
+// Completed tab: completed quests, newest first, each with a Restore button.
+function renderCompletedList() {
+  const list = document.getElementById('completed-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const completed = loadCompletedQuests().slice().sort((a, b) => b.completedAt - a.completedAt);
+  if (!completed.length) {
+    list.appendChild(createElement('li', { class: 'completed-empty' }, 'No completed quests yet.'));
+    return;
+  }
+  completed.forEach(c => {
+    const li = createElement('li', { class: 'completed-entry' },
+      createElement('strong', {}, c.title),
+      '  ',
+      createElement('span', { class: 'completed-meta' },
+        `[${c.kind}]  ·  (${c.importance})  ·  ${new Date(c.completedAt).toLocaleString()}`
+      )
+    );
+    const restoreButton = createElement('button', { class: 'restore-btn' }, 'Restore');
+    restoreButton.addEventListener('click', () => restoreQuest(c.id));
+    li.appendChild(restoreButton);
+    list.appendChild(li);
+  });
+}
+
+// Move a quest back to the active list (all tasks unchecked) and drop it from completed.
+function restoreQuest(id) {
+  const completed = loadCompletedQuests();
+  const c = completed.find(x => x.id === id);
+  if (!c) return;
+  const restored = {
+    id: c.id,
+    title: c.title,
+    kind: c.kind,
+    category: c.category,
+    importance: c.importance,
+    tasks: (c.tasks || []).map(t => ({ text: taskText(t), done: false })),
+    status: 'todo',
+    createdAt: Date.now(),
+  };
+  const data = loadData();
+  if (!data.quests) data.quests = [];
+  if (!data.quests.some(q => q.id === id)) data.quests.push(restored);
+  saveData(data);
+  removeCompletedQuest(id);
+  render();
+  renderCompletedList();
+}
+renderCompletedList();
 
 // Initial render when the page loads
 render();
