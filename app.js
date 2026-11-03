@@ -27,6 +27,9 @@ const genId = () => '_' + Math.random().toString(36).slice(2, 11);
 const taskText = (t) => (typeof t === 'string' ? t : (t && t.text)) || '';
 const taskDone = (t) => (typeof t === 'object' && t !== null) ? !!t.done : false;
 
+// Importance level shown as a small OSRS-style chip. Text stays exactly low/medium/high.
+const importanceTag = (level) => createElement('span', { class: 'tag importance-tag tag-' + level }, level);
+
 // Guidance panel state + cache (separate localStorage key, storage.js untouched)
 let selectedQuestId = null;
 const GUIDANCE_CACHE_KEY = 'guidanceCache';
@@ -50,7 +53,8 @@ function showQuestPanel(quest) {
   const panel = createElement('div', { id: 'quest-panel' },
     createElement('h3', {}, quest.title),
     createElement('p', { id: 'quest-meta' },
-      `Type: ${quest.kind}  ·  Category: ${quest.category}  ·  Importance: ${quest.importance}`
+      `Type: ${quest.kind}  ·  Category: ${quest.category}  ·  Importance: `,
+      importanceTag(quest.importance)
     ),
     createElement('h4', {}, 'How to complete this')
   );
@@ -208,7 +212,12 @@ function render() {
     ),
     createElement('select', { id: 'category' },
       createElement('option', { value: 'School' }, 'School'),
-      createElement('option', { value: 'Job' }, 'Job')
+      createElement('option', { value: 'Job' }, 'Job'),
+      createElement('option', { value: 'Health' }, 'Health'),
+      createElement('option', { value: 'Social' }, 'Social'),
+      createElement('option', { value: 'Creative' }, 'Creative'),
+      createElement('option', { value: 'Career' }, 'Career'),
+      createElement('option', { value: 'Portfolio' }, 'Portfolio')
     ),
     createElement('select', { id: 'importance' },
       createElement('option', { value: 'low' }, 'Low'),
@@ -289,7 +298,7 @@ function render() {
       ' ',
       createElement('span', {}, `[${q.kind}]`),
       ' ',
-      createElement('span', {}, `(${q.importance})`),
+      importanceTag(q.importance),
       taskUl
     );
     li.addEventListener('click', () => selectQuest(q));
@@ -426,7 +435,9 @@ function renderCompletedList() {
       createElement('strong', {}, c.title),
       '  ',
       createElement('span', { class: 'completed-meta' },
-        `[${c.kind}]  ·  (${c.importance})  ·  ${new Date(c.completedAt).toLocaleString()}`
+        `[${c.kind}]  ·  `,
+        importanceTag(c.importance),
+        `  ·  ${new Date(c.completedAt).toLocaleString()}`
       )
     );
     const restoreButton = createElement('button', { class: 'restore-btn' }, 'Restore');

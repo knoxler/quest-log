@@ -69,6 +69,32 @@ html, body { height: 100%; }
   opacity: 0.5; /* dimmer finished tasks */
 }
 
+/* Importance chips (OSRS-style): text stays low/medium/high, beveled colored fill.
+   Kept small so it doesn't affect row height. */
+.importance-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0.15rem 0.4rem;
+  border: 2px solid;
+  vertical-align: middle;
+}
+.tag-high { /* muted red */
+  background: #7a3b3b;
+  border-color: #a56b6b #4a2222 #4a2222 #a56b6b;
+  color: #f2d9d9;
+}
+.tag-medium { /* muted yellow/olive; dark text for readability */
+  background: #8a7a2f;
+  border-color: #b3a355 #574d1c #574d1c #b3a355;
+  color: #201c08;
+}
+.tag-low { /* muted green */
+  background: #3f6b3f;
+  border-color: #6f9a6f #243b24 #243b24 #6f9a6f;
+  color: #d3e8d3;
+}
+
 /* Right-column "how to complete" panel */
 #quest-panel {
   background: #1a1a1a;
